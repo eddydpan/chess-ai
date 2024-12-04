@@ -4,8 +4,13 @@ A module that tests the implementation frmo eval.py
 
 import chess
 import eval
+import time
 
 board = chess.Board()
+start_time = time.time()
+
+
+
 # legal_moves = [board.san(move) for move in board.legal_moves] # list of legal moves
 
 # print(legal_moves)
@@ -28,6 +33,12 @@ board = chess.Board()
 # print(f"Score is {score}")
 print(board)
 t = 0
-for i in range(10000):
+num_trials = 30000
+for i in range(num_trials):
         t = eval.calc_piece_activity(board)
 print(t)
+end_time = time.time()
+
+elapsed_time = end_time - start_time
+
+print(f"Elapsed time: {elapsed_time} seconds for {num_trials} trials.")

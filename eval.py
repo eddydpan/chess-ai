@@ -106,19 +106,13 @@ def calc_piece_activity(board=chess.Board()):
         if (char.isalpha()):
             if (char.isupper()):
                 sum += pst[char][find_piece_index(board_epd, idx)] + piece_vals[char]
-    print(f"Sum: {sum}")
     ################################# ROTATE THE BOARD #################################
     reversed_board_epd = board_epd[::-1].swapcase() # now white is black and black is white
-
-    ###
-    print(board_epd)
-    print(reversed_board_epd)
-    ##
     for idx, char in enumerate(reversed_board_epd):
         if (char.isalpha()):
             if (char.isupper()):
                 sum -= pst[char][find_piece_index(reversed_board_epd, idx)] + piece_vals[char]
-    print(f"Sum: {sum}")
+    # print(f"Score: {sum}")
     return sum
     # for i in range(BOARD_SIZE):
     #     piece = str(board.piece_at(i))
