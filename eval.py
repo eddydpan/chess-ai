@@ -4,7 +4,7 @@ structure, piece development, etc. and returns a float that's positive if white
 is better, and negative if black is better.
 """
 import chess
-
+BOARD_SIZE = 64
 piece_vals = {"P": 100, "N": 280, "B": 320, "R": 479, "Q": 929, "K": 60000, 
               "p": -100, "n": -280, "b": -320, "r": -479, "q": -929, "k": -60000}
 pst = {
@@ -60,22 +60,84 @@ pst = {
 }
 
 
-def sum_piece_vals(board_epd=chess.Board().epd()):
+# def sum_piece_vals(board_epd=chess.Board().epd()):
+#     """
+#     Sums up the piece values of all the pieces on the board.
+
+#     Args:
+#         board_epd: a chess.Board() object's epd string that represents all
+#             pieces on the board.
+#     Returns:
+#         An integer that represents the difference between black's piece value
+#         sum and white's.
+#     """
+#     sum = 0
+#     for char in board_epd:
+#         if (char.isalpha()):
+#             sum += piece_vals[char]
+#     return sum
+
+def find_piece_index(board_epd="", idx=0):
+    index = 0
+    for char in board_epd[:idx]: # "rn"
+        if char.isalpha():
+            index += 1
+        elif char == "/":
+            continue
+        else:
+            index += int(char)
+    return index
+
+def calc_piece_activity(board=chess.Board()):
     """
-    Sums up the piece values of all the pieces on the board.
+    Computes the bonuses for each side given the position of the pieces on the
+    board. From black's POV when using pychess indexing.
 
     Args:
-        board_epd: a chess.Board() object's epd string that represents all
-            pieces on the board.
+        board: a chess.Board() object to access pieces' positions.
     Returns:
-        An integer that represents the difference between black's piece value
-        sum and white's.
+        An integer representing the difference between the bonuses for each
+        side.
     """
     sum = 0
-    for char in board_epd:
+    epd = board.epd()
+    board_epd = epd.split(" ")[0]
+    for idx, char in enumerate(board_epd):
         if (char.isalpha()):
-            sum += piece_vals[char]
+            if (char.isupper()):
+                sum += pst[char][find_piece_index(board_epd, idx)] + piece_vals[char]
+    print(f"Sum: {sum}")
+    ################################# ROTATE THE BOARD #################################
+    reversed_board_epd = board_epd[::-1].swapcase() # now white is black and black is white
+
+    ###
+    print(board_epd)
+    print(reversed_board_epd)
+    ##
+    for idx, char in enumerate(reversed_board_epd):
+        if (char.isalpha()):
+            if (char.isupper()):
+                sum -= pst[char][find_piece_index(reversed_board_epd, idx)] + piece_vals[char]
+    print(f"Sum: {sum}")
     return sum
+    # for i in range(BOARD_SIZE):
+    #     piece = str(board.piece_at(i))
+    #     if piece.isupper():
+    #         try:
+    #             # Access piece value and the weight of the piece at the position
+    #             piece_pos_val = (piece_vals[piece] + pst[piece][i])
+    #             score += piece_pos_val
+    #         except KeyError: # catch a None, since None can't have islower() called on it
+    #             continue
+    #     else:
+    #         try:
+    #             # rotate
+    #             # Access piece value and the weight of the piece at the position
+    #             piece_pos_val = (piece_vals[piece] + pst[piece.isupper()][i])
+    #             score += piece_pos_val
+    #         except KeyError: # catch a None, since None can't have islower() called on it
+    #             continue
+    
 
 def evaluate_board(board=chess.Board()):
     """
@@ -91,31 +153,35 @@ def evaluate_board(board=chess.Board()):
         the more favored the position is.
     """
 
-    legal_moves = [board.san(move) for move in board.legal_moves] # list of legal moves
+    # legal_moves = [board.san(move) for move in board.legal_moves] # list of legal moves
     
-    # CALCULATE MATERIAL DIFFERENCE: should be weighed pretty heavily, sum up material of each side 
-    piece_val_sum = sum_piece_vals(board.epd())
-    # CALCULATE PIECE ACTIVITY: sum up activity of both sides
+    # # CALCULATE MATERIAL DIFFERENCE: should be weighed pretty heavily, sum up material of each side 
+    # piece_val_sum = sum_piece_vals(board.epd())
+    # # CALCULATE PIECE ACTIVITY: sum up activity of both sides
+    # piece_activity = calc_piece_activity(board)
 
-    # CALCULATE KING SAFETY ... does this require knowledge of future positions? what if mate in 1?
-    # OR king safety = position of 8x8 table of king position scores
 
-    # FINAL SCORE CALCULATION:
-    # score = c1 * material_diff + c2 * piece_activity + c3 * king_safety
+    # # CALCULATE KING SAFETY ... does this require knowledge of future positions? what if mate in 1?
+    # # OR king safety = position of 8x8 table of king position scores
 
-    score = 0 # board score of how good black's position is
+    # # FINAL SCORE CALCULATION:
+    # # score = c1 * material_diff + c2 * piece_activity + c3 * king_safety
 
-    for i in range(64):
-        side = 1
-        piece = str(board.piece_at(i))
-        try:
-            if (piece.islower()):
-                    side = -1 # lowercase "pieces" are playing as white
-                    continue
+    # score = 0 # board score of how good black's position is
 
-            # Access piece value and the weight of the piece at the position
-            piece_pos_val = side * (piece_vals[piece.upper()] + pst[piece][i])
-            score += piece_pos_val
-        except KeyError: # catch a None, since None can't have islower() called on it
-            continue
-    return score
+    # for i in range(64):
+    #     side = 1
+    #     piece = str(board.piece_at(i))
+    #     try:
+    #         if (piece.islower()):
+    #                 side = -1 # lowercase "pieces" are playing as white
+    #                 continue
+
+    #         # Access piece value and the weight of the piece at the position
+    #         piece_pos_val = side * (piece_vals[piece.upper()] + pst[piece][i])
+    #         score += piece_pos_val
+    #     except KeyError: # catch a None, since None can't have islower() called on it
+    #         continue
+    # return score
+
+    return calc_piece_activity(board)
