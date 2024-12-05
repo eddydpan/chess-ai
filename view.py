@@ -1,7 +1,3 @@
-"""
-View of our chess board.
-"""
-
 import pygame
 import chess
 import controller
@@ -51,6 +47,7 @@ class DrawGame:
 
         # set currently selected piece by player
         self.selected_square = None
+        self.potential_moves = []
 
     def draw(self):
         """
@@ -61,6 +58,11 @@ class DrawGame:
 
         # draw the pieces
         self.draw_pieces()
+
+        # highlight selected square and potential moves
+        if self.selected_square is not None:
+            self.highlight_square(self.selected_square)
+            self.highlight_moves(self.potential_moves)
 
     def user_interface(self, event):
         """
@@ -83,9 +85,11 @@ class DrawGame:
                     piece = self.board.piece_at(current_square)
                     if piece is not None:
                         self.selected_square = current_square
+                        self.potential_moves = self.get_potential_moves(current_square)
                 else:
                     self.control.move(self.selected_square, current_square)
                     self.selected_square = None
+                    self.potential_moves = []
                     self.control.bot_move()
 
     def draw_board(self):
@@ -126,3 +130,57 @@ class DrawGame:
         signifying the position of the piece
         """
         return int(y * 8 + x)
+
+    def highlight_square(self, square):
+        """
+        Highlight the selected square.
+        """
+        x = square % 8
+        y = square // 8
+        pygame.draw.rect(
+            self.screen,
+            (175, 201, 210),  # Green highlight
+            pygame.Rect(
+                x * self.square_size + self.padding + 7,
+                (7 - y) * self.square_size + self.padding + 7.2,
+                self.square_size + 2,
+                self.square_size + 2,
+            ),
+            9,  # Border thickness
+        )
+
+    def highlight_moves(self, moves):
+        """
+        Highlight the potential moves for the selected piece.
+        """
+        for move in moves:
+            x = move % 8
+            y = move // 8
+            pygame.draw.circle(
+                self.screen,
+                (1, 71, 90),  # Yellow highlight for potential moves
+                (
+                    x * self.square_size + self.square_size // 2 + self.padding + 8.5,
+                    (7 - y) * self.square_size
+                    + self.square_size // 2
+                    + self.padding
+                    + 8.5,
+                ),
+                self.square_size // 4,  # Size of the circle
+                5,  # Border thickness
+            )
+
+    def get_potential_moves(self, square):
+        """
+        Get all potential moves for a selected piece on the board.
+        """
+        piece = self.board.piece_at(square)
+        if piece is None:
+            return []
+
+        # Get the moves for the piece (for simplicity, let's assume we use chess library's legal_moves)
+        legal_moves = self.board.legal_moves
+        potential_moves = [
+            move.to_square for move in legal_moves if move.from_square == square
+        ]
+        return potential_moves
