@@ -1,6 +1,6 @@
 """
 Evaluates the state of a chess board depending on the material difference, pawn
-structure, piece development, etc. and returns a float that's positive if white
+structure, piece development, etc. and returns an int that's positive if white
 is better, and negative if black is better.
 """
 import chess
@@ -79,7 +79,8 @@ pst = {
 
 def find_piece_index(board_epd="", idx=0):
     """
-    Finds the index of the piece on the board (0-63) given the board epd string
+    Finds index of the piece on the board (0-63) given the board epd string and
+    index in the epd String.
 
     Args:
         board_epd: a String representing the epd of the chess board object.
