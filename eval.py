@@ -5,8 +5,9 @@ is better, and negative if black is better.
 """
 import chess
 BOARD_SIZE = 64
-piece_vals = {"P": 100, "N": 280, "B": 320, "R": 479, "Q": 929, "K": 60000, 
-              "p": -100, "n": -280, "b": -320, "r": -479, "q": -929, "k": -60000}
+# piece_vals = {"P": 100, "N": 280, "B": 320, "R": 479, "Q": 929, "K": 60000, 
+#               "p": -100, "n": -280, "b": -320, "r": -479, "q": -929, "k": -60000}
+piece_vals = {"P": 100, "N": 280, "B": 320, "R": 479, "Q": 929, "K": 60000}
 pst = {
     # The bot is playing as black
     'P': (   0,   0,   0,   0,   0,   0,   0,   0,  #       ^ player |
@@ -128,7 +129,7 @@ def calc_piece_activity(board=chess.Board()):
     return sum
     
 
-def evaluate_board(board=chess.Board()):
+def evaluate_board(board=chess.Board(), move=chess.Move(chess.Move.null(), chess.Move.null()), score=0):
     """
     Computes the score of the chess board depending on which player's move it
     is, material difference, piece activity, pawn structure, king safety, etc.
@@ -144,16 +145,30 @@ def evaluate_board(board=chess.Board()):
 
     # legal_moves = [board.san(move) for move in board.legal_moves] # list of legal moves
     
-    # # CALCULATE MATERIAL DIFFERENCE: should be weighed pretty heavily, sum up material of each side 
+    # CALCULATE MATERIAL DIFFERENCE: should be weighed pretty heavily, sum up material of each side 
     # piece_val_sum = sum_piece_vals(board.epd())
-    # # CALCULATE PIECE ACTIVITY: sum up activity of both sides
+    # CALCULATE PIECE ACTIVITY: sum up activity of both sides
     # piece_activity = calc_piece_activity(board)
 
 
-    # # CALCULATE KING SAFETY ... does this require knowledge of future positions? what if mate in 1?
-    # # OR king safety = position of 8x8 table of king position scores
+    # CALCULATE KING SAFETY ... does this require knowledge of future positions? what if mate in 1?
+    # OR king safety = position of 8x8 table of king position scores
 
-    # # FINAL SCORE CALCULATION:
-    # # score = c1 * material_diff + c2 * piece_activity + c3 * king_safety
+    # FINAL SCORE CALCULATION:
+    # score = c1 * material_diff + c2 * piece_activity + c3 * king_safety
+    
+    # Update the piece activity
+    capture_dif = 0
+    atk_piece = board.piece_at(move.from_square).symbol() # get the piece, like "B"
+    pst_dif = pst[atk_piece][move.to_square] - pst[atk_piece][move.from_square]
+
+    # Update for captures
+    if board.is_capture(move):
+        # Only get a captured piece if there was a capture
+        cptd_piece = board.piece_at(move.to_square).symbol()
+        # Sum piece value of captured piece with its activity, reverse the board with 63-move.to_square
+        capture_dif = piece_vals[board.piece_at(move.to_square).piece_type.symbol()] + pst[cptd_piece][63 - move.to_square]
+
+    return score + pst_dif + capture_dif
 
     return calc_piece_activity(board)
