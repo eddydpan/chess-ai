@@ -86,6 +86,8 @@ class DrawGame:
                 else:
                     self.control.move(self.selected_square, current_square)
                     self.selected_square = None
+                    self.draw()
+                    pygame.display.flip()
                     self.control.bot_move()
 
     def draw_board(self):

@@ -4,6 +4,7 @@ object.
 """
 
 import chess
+import minimax
 
 
 class ControlGame:
@@ -35,3 +36,7 @@ class ControlGame:
         """
         bot makes a move
         """
+        minmax = minimax.Minimax(self.board)
+
+        results = minmax.generate_next_move(3)
+        self.board.push(results[1])
