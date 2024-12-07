@@ -4,20 +4,26 @@ structure, piece development, etc. and returns an int that's positive if white
 is better, and negative if black is better.
 """
 import chess
+import logging
+
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
+
 BOARD_SIZE = 64
 # piece_vals = {"P": 100, "N": 280, "B": 320, "R": 479, "Q": 929, "K": 60000, 
 #               "p": -100, "n": -280, "b": -320, "r": -479, "q": -929, "k": -60000}
 piece_vals = {"P": 100, "N": 280, "B": 320, "R": 479, "Q": 929, "K": 60000}
 pst = {
     # The bot is playing as black
-    'P': (   0,   0,   0,   0,   0,   0,   0,   0,  #       ^ player |
-            78,  83,  86,  73, 102,  82,  85,  90,  #       |        |
-             7,  29,  21,  44,  40,  31,  44,   7,  #       |        |
-           -17,  16,  -2,  15,  14,   0,  15, -13,  #       |        |
-           -26,   3,  10,   9,   6,   1,   0, -23,  #       |        |
-           -22,   9,   5, -11, -10,  -2,   3, -19,  #       |        |
-           -31,   8,  -7, -37, -36, -14,   3, -31,  #       |        |
-             0,   0,   0,   0,   0,   0,   0,   0), #   BOT |        V
+    'P': (   0,   0,   0,   0,   0,   0,   0,   0,  #       ^ player | idx = 0
+            78,  83,  86,  73, 102,  82,  85,  90,  #       |        |           .
+             7,  29,  21,  44,  40,  31,  44,   7,  #       |        |            .
+           -17,  16,  -2,  15,  14,   0,  15, -13,  #       |        |             .
+           -26,   3,  10,   9,   6,   1,   0, -23,  #       |        |              .
+           -22,   9,   5, -11, -10,  -2,   3, -19,  #       |        |               .
+           -31,   8,  -7, -37, -36, -14,   3, -31,  #       |        |                .
+             0,   0,   0,   0,   0,   0,   0,   0), #   BOT |        V                  idx = 63
     'N': ( -66, -53, -75, -75, -10, -55, -58, -70,
             -3,  -6, 100, -36,   4,  62,  -4, -14,
             10,  67,   1,  74,  73,  27,  62,  -2,
@@ -158,17 +164,24 @@ def evaluate_board(board=chess.Board(), move=chess.Move(chess.Move.null(), chess
     # score = c1 * material_diff + c2 * piece_activity + c3 * king_safety
     
     # Update the piece activity
+    side = 2*board.turn - 1 # either 1 or -1
+    # logging.info(f"Score: {score}")
     capture_dif = 0
-    atk_piece = board.piece_at(move.from_square).symbol() # get the piece, like "B"
-    pst_dif = pst[atk_piece][move.to_square] - pst[atk_piece][move.from_square]
+    atk_piece = board.piece_at(move.from_square).symbol().upper() # get the piece, like "B"
+    pst_dif = pst[atk_piece][-side * move.to_square] - pst[atk_piece][-side * move.from_square]
 
+    # logging.info("atk_piece and pst_dif")
+    # breakpoint()
     # Update for captures
     if board.is_capture(move):
+
+        logging.info("capture")
+        breakpoint()
         # Only get a captured piece if there was a capture
         cptd_piece = board.piece_at(move.to_square).symbol()
         # Sum piece value of captured piece with its activity, reverse the board with 63-move.to_square
         capture_dif = piece_vals[board.piece_at(move.to_square).piece_type.symbol()] + pst[cptd_piece][63 - move.to_square]
-
-    return score + pst_dif + capture_dif
-
-    return calc_piece_activity(board)
+    
+    # logging.info("before returning")
+    # breakpoint()
+    return side * (score + pst_dif + capture_dif)
