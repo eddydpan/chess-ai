@@ -3,6 +3,7 @@ Evaluates the state of a chess board depending on the material difference, pawn
 structure, piece development, etc. and returns an int that's positive if white
 is better, and negative if black is better.
 """
+
 import chess
 import logging
 
@@ -84,6 +85,7 @@ pst = {
 #             sum += piece_vals[char]
 #     return sum
 
+
 def find_piece_index(board_epd="", idx=0):
     """
     Finds index of the piece on the board (0-63) given the board epd string and
@@ -96,7 +98,7 @@ def find_piece_index(board_epd="", idx=0):
         An int representing the index of the piece on the chess board.
     """
     index = 0
-    for char in board_epd[:idx]: # "rn"
+    for char in board_epd[:idx]:  # "rn"
         if char.isalpha():
             index += 1
         elif char == "/":
@@ -104,6 +106,7 @@ def find_piece_index(board_epd="", idx=0):
         else:
             index += int(char)
     return index
+
 
 def calc_piece_activity(board=chess.Board()):
     """
@@ -113,7 +116,7 @@ def calc_piece_activity(board=chess.Board()):
     Args:
         board: a chess.Board() object to access pieces' positions.
     Returns:
-        An integer representing the difference between the piece values and 
+        An integer representing the difference between the piece values and
         peice activity bonuses for each side. A positive result means white is
         better, and vice versa for a negative result.
     """
@@ -121,19 +124,24 @@ def calc_piece_activity(board=chess.Board()):
     epd = board.epd()
     board_epd = epd.split(" ")[0]
     for idx, char in enumerate(board_epd):
-        if (char.isalpha()):
-            if (char.isupper()):
+        if char.isalpha():
+            if char.isupper():
                 sum += pst[char][find_piece_index(board_epd, idx)] + piece_vals[char]
 
     ################################# ROTATE THE BOARD #################################
-    reversed_board_epd = board_epd[::-1].swapcase() # now white is black and black is white
+    reversed_board_epd = board_epd[
+        ::-1
+    ].swapcase()  # now white is black and black is white
     for idx, char in enumerate(reversed_board_epd):
-        if (char.isalpha()):
-            if (char.isupper()):
-                sum -= pst[char][find_piece_index(reversed_board_epd, idx)] + piece_vals[char]
+        if char.isalpha():
+            if char.isupper():
+                sum -= (
+                    pst[char][find_piece_index(reversed_board_epd, idx)]
+                    + piece_vals[char]
+                )
     # print(f"Score: {sum}")
     return sum
-    
+
 
 def evaluate_board(board=chess.Board(), move=chess.Move(chess.Move.null(), chess.Move.null()), score=0):
     """
@@ -144,25 +152,10 @@ def evaluate_board(board=chess.Board(), move=chess.Move(chess.Move.null(), chess
         board: a chess.Board() object to be evaluated. Defaults to starting
             game position.
     Returns:
-        A float where a positive number means white is favored and a negative
-        number means black is favored. The greater the magnitude of the float,
+        An int where a positive number means white is favored and a negative
+        number means black is favored. The greater the magnitude of the int,
         the more favored the position is.
     """
-
-    # legal_moves = [board.san(move) for move in board.legal_moves] # list of legal moves
-    
-    # CALCULATE MATERIAL DIFFERENCE: should be weighed pretty heavily, sum up material of each side 
-    # piece_val_sum = sum_piece_vals(board.epd())
-    # CALCULATE PIECE ACTIVITY: sum up activity of both sides
-    # piece_activity = calc_piece_activity(board)
-
-
-    # CALCULATE KING SAFETY ... does this require knowledge of future positions? what if mate in 1?
-    # OR king safety = position of 8x8 table of king position scores
-
-    # FINAL SCORE CALCULATION:
-    # score = c1 * material_diff + c2 * piece_activity + c3 * king_safety
-    
     # Update the piece activity
     side = 2*board.turn - 1 # either 1 or -1
     # logging.info(f"Score: {score}")
@@ -170,18 +163,13 @@ def evaluate_board(board=chess.Board(), move=chess.Move(chess.Move.null(), chess
     atk_piece = board.piece_at(move.from_square).symbol().upper() # get the piece, like "B"
     pst_dif = pst[atk_piece][-side * move.to_square] - pst[atk_piece][-side * move.from_square]
 
-    # logging.info("atk_piece and pst_dif")
-    # breakpoint()
     # Update for captures
     if board.is_capture(move):
-
         logging.info("capture")
         breakpoint()
         # Only get a captured piece if there was a capture
         cptd_piece = board.piece_at(move.to_square).symbol()
         # Sum piece value of captured piece with its activity, reverse the board with 63-move.to_square
         capture_dif = piece_vals[board.piece_at(move.to_square).piece_type.symbol()] + pst[cptd_piece][63 - move.to_square]
-    
-    # logging.info("before returning")
-    # breakpoint()
+        
     return side * (score + pst_dif + capture_dif)
