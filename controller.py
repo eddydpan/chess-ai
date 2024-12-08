@@ -41,5 +41,5 @@ class ControlGame:
         """
         minmax = minimax.Minimax(self.board)
 
-        results = minmax.alpha_beta_min(3, float("-inf"), float("inf"))
+        results = minmax.alpha_beta_min(4, float("-inf"), float("inf"))
         self.board.push(results[1])

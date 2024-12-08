@@ -17,7 +17,7 @@ class Minimax:
 
     def alpha_beta_max(self, depth, alpha, beta):
         if depth == 0:
-            return (evaluate_board(self.board), None)
+            return (calc_piece_activity(self.board), None)
         max_eval = float("-inf")
         best_move = None
 
@@ -38,7 +38,7 @@ class Minimax:
 
     def alpha_beta_min(self, depth, alpha, beta):
         if depth == 0:
-            return (-evaluate_board(self.board), None)
+            return (calc_piece_activity(self.board), None)
         min_eval = float("inf")
         best_move = None
 
