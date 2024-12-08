@@ -81,17 +81,35 @@ class DrawGame:
             # mouse pressed somewhere in the chess board
             if x >= 0 and x <= 7 and y >= 0 and y <= 7:
                 current_square = self.board_xy_to_num(x, y)
+                piece = self.board.piece_at(current_square)
                 if self.selected_square is None:
-                    piece = self.board.piece_at(current_square)
                     if piece is not None:
                         self.selected_square = current_square
                         self.potential_moves = self.get_potential_moves(current_square)
                 else:
-                    self.control.move(self.selected_square, current_square)
-                    self.selected_square = None
-                    self.draw()
-                    pygame.display.flip()
-                    self.control.bot_move()
+                    move_successful = self.control.move(
+                        self.selected_square, current_square
+                    )
+                    if move_successful:
+                        self.selected_square = None
+                        self.draw()
+                        pygame.display.flip()
+                        self.control.bot_move()
+                    else:
+                        if piece is not None and str(piece) in (
+                            "B",
+                            "K",
+                            "N",
+                            "P",
+                            "Q",
+                            "R",
+                        ):
+                            self.selected_square = current_square
+                            self.potential_moves = self.get_potential_moves(
+                                current_square
+                            )
+                        else:
+                            self.selected_square = None
 
     def draw_board(self):
         """

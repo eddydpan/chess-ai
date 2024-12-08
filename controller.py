@@ -23,6 +23,9 @@ class ControlGame:
         move = chess.Move(from_square=move_from, to_square=move_to)
         if move in self.board.legal_moves:
             self.board.push(move)
+            return True
+        else:
+            return False
 
     def move_uci(self, string):
         """
@@ -38,5 +41,5 @@ class ControlGame:
         """
         minmax = minimax.Minimax(self.board)
 
-        results = minmax.generate_next_move(3)
+        results = minmax.alpha_beta_min(3, float("-inf"), float("inf"))
         self.board.push(results[1])
