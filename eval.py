@@ -166,10 +166,10 @@ def evaluate_board(board=chess.Board(), move=chess.Move(chess.Move.null(), chess
     # Update for captures
     if board.is_capture(move):
         logging.info("capture")
-        breakpoint()
         # Only get a captured piece if there was a capture
-        cptd_piece = board.piece_at(move.to_square).symbol()
+        cptd_piece = board.piece_at(move.to_square).symbol().upper()
         # Sum piece value of captured piece with its activity, reverse the board with 63-move.to_square
-        capture_dif = piece_vals[board.piece_at(move.to_square).piece_type.symbol()] + pst[cptd_piece][63 - move.to_square]
-        
-    return side * (score + pst_dif + capture_dif)
+        capture_dif = piece_vals[board.piece_at(move.to_square).symbol().upper()] + pst[cptd_piece][side * move.to_square]
+        breakpoint()
+    breakpoint()
+    return score + (pst_dif + capture_dif) * side

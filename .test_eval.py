@@ -55,8 +55,15 @@ print(f"Score is {score}")
 
 board2.push_san("e4")
 
-m = chess.Move(chess.E7, chess.E5)
-score = eval.evaluate_board(board2, move=m, score=-score)
+m = chess.Move(chess.D7, chess.D5)
+score = eval.evaluate_board(board2, move=m, score=score)
+print(board2)
+print(f"Score is {score}")
+
+board2.push_san("d5")
+
+m = chess.Move(chess.E4, chess.D5)
+score = eval.evaluate_board(board2, move=m, score=score)
 print(board2)
 print(f"Score is {score}")
 ######################
