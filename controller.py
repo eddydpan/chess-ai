@@ -56,7 +56,7 @@ class ControlGame:
         """
         minmax = minimax.Minimax(self.board)
 
-        results = minmax.alpha_beta_min(4, float("-inf"), float("inf"))
+        results = minmax.alpha_beta_min(2, float("-inf"), float("inf"), None)
         if self.board.is_capture(results[1]):
             self.captured_pieces_white.append(
                 self.board.piece_at(results[1].to_square).symbol()
