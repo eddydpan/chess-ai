@@ -15,6 +15,8 @@ class ControlGame:
 
     def __init__(self, board):
         self.board = board
+        self.captured_pieces_white = []
+        self.captured_pieces_black = []
 
     def move(self, move_from: int, move_to: int):
         """
@@ -31,6 +33,11 @@ class ControlGame:
             self.board.push(move_promote)
             return True
         if move in self.board.legal_moves:
+            # Check if the move is a capture
+            if self.board.is_capture(move):
+                captured_piece = self.board.piece_at(move.to_square).symbol()
+                if self.board.turn:  # White's turn, so black piece is captured
+                    self.captured_pieces_black.append(captured_piece)
             self.board.push(move)
             return True
         return False
@@ -49,5 +56,9 @@ class ControlGame:
         """
         minmax = minimax.Minimax(self.board)
 
-        results = minmax.alpha_beta_max(3, float("-inf"), float("inf"))
+        results = minmax.alpha_beta_min(4, float("-inf"), float("inf"))
+        if self.board.is_capture(results[1]):
+            self.captured_pieces_white.append(
+                self.board.piece_at(results[1].to_square).symbol()
+            )
         self.board.push(results[1])

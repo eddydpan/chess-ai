@@ -59,6 +59,8 @@ class DrawGame:
         # draw the pieces
         self.draw_pieces()
 
+        self.draw_captured_pieces()
+
         # highlight selected square and potential moves
         if self.selected_square is not None:
             self.highlight_square(self.selected_square)
@@ -136,6 +138,34 @@ class DrawGame:
                         pos_y,
                     ),
                 )
+
+    def draw_captured_pieces(self):
+        """
+        Draw the captured pieces for both black and white players.
+        """
+        # Define the start positions for displaying captured pieces
+        black_start_x, black_start_y = 990, 100  # Top-right for black captured pieces
+        white_start_x, white_start_y = (
+            990,
+            600,
+        )  # Bottom-right for white captured pieces
+        piece_spacing = 30  # Spacing between captured pieces
+
+        # Draw captured black pieces
+        for index, piece in enumerate(self.control.captured_pieces_black):
+            x = (
+                black_start_x + (index % 8) * piece_spacing
+            )  # Wrap to next line after 8 pieces
+            y = black_start_y + (index // 8) * piece_spacing
+            self.screen.blit(self.piece_image[piece], (x, y))
+
+        # Draw captured white pieces
+        for index, piece in enumerate(self.control.captured_pieces_white):
+            x = (
+                white_start_x + (index % 8) * piece_spacing
+            )  # Wrap to next line after 8 pieces
+            y = white_start_y + (index // 8) * piece_spacing
+            self.screen.blit(self.piece_image[piece], (x, y))
 
     def scaled_chess_piece(self, image_link, scale_ratio):
         """
