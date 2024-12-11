@@ -1,6 +1,7 @@
 import pygame
 import chess
 import controller
+import eval
 
 
 class DrawGame:
@@ -60,6 +61,7 @@ class DrawGame:
         self.draw_pieces()
 
         self.draw_captured_pieces()
+        self.draw_evaluation_bar()
 
         # highlight selected square and potential moves
         if self.selected_square is not None:
@@ -144,27 +146,28 @@ class DrawGame:
         Draw the captured pieces for both black and white players.
         """
         # Define the start positions for displaying captured pieces
-        black_start_x, black_start_y = 990, 100  # Top-right for black captured pieces
+        black_start_x, black_start_y = 1060, 100  # Top-right for black captured pieces
         white_start_x, white_start_y = (
-            990,
+            1060,
             600,
         )  # Bottom-right for white captured pieces
-        piece_spacing = 30  # Spacing between captured pieces
+        piece_spacing_x = 30  # Spacing between captured pieces
+        piece_spacing_y = 50
 
         # Draw captured black pieces
         for index, piece in enumerate(self.control.captured_pieces_black):
             x = (
-                black_start_x + (index % 8) * piece_spacing
+                black_start_x + (index % 5) * piece_spacing_x
             )  # Wrap to next line after 8 pieces
-            y = black_start_y + (index // 8) * piece_spacing
+            y = black_start_y + (index // 5) * piece_spacing_y
             self.screen.blit(self.piece_image[piece], (x, y))
 
         # Draw captured white pieces
         for index, piece in enumerate(self.control.captured_pieces_white):
             x = (
-                white_start_x + (index % 8) * piece_spacing
+                white_start_x + (index % 5) * piece_spacing_x
             )  # Wrap to next line after 8 pieces
-            y = white_start_y + (index // 8) * piece_spacing
+            y = white_start_y + (index // 5) * piece_spacing_y
             self.screen.blit(self.piece_image[piece], (x, y))
 
     def scaled_chess_piece(self, image_link, scale_ratio):
@@ -233,3 +236,44 @@ class DrawGame:
             move.to_square for move in legal_moves if move.from_square == square
         ]
         return potential_moves
+
+    def draw_evaluation_bar(self):
+        """
+        Draws an evaluation bar showing the game's evaluation score.
+        """
+        eval_score = eval.calc_piece_activity(
+            self.board
+        )  # Assuming you have an evaluation method in ControlGame
+        bar_x = 970  # Positioning the bar on the right
+        bar_y = 20
+        bar_width = 50
+        bar_height = 920
+
+        # Normalize the evaluation score
+        normalized_eval = max(-1500, min(1500, eval_score))
+        percentage = (normalized_eval + 1500) / 3000  # Map to [0, 1] range
+        black = (0, 0, 0)
+        white = (255, 255, 255)
+
+        white_height = int(bar_height * percentage)
+
+        black_height = int(bar_height * (1 - percentage))
+
+        # Draw bar background
+        pygame.draw.rect(
+            self.screen,
+            (100, 100, 100),
+            (bar_x - 5, bar_y - 5, bar_width + 10, bar_height + 10),
+        )
+
+        # Draw the filled part
+        pygame.draw.rect(
+            self.screen,
+            black,
+            (bar_x, bar_y, bar_width, black_height),
+        )
+        pygame.draw.rect(
+            self.screen,
+            white,
+            (bar_x, bar_y + black_height, bar_width, white_height),
+        )
