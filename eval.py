@@ -6,6 +6,7 @@ is better, and negative if black is better.
 
 import chess
 import logging
+import numpy as np
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
@@ -15,6 +16,18 @@ BOARD_SIZE = 64
 # piece_vals = {"P": 100, "N": 280, "B": 320, "R": 479, "Q": 929, "K": 60000, 
 #               "p": -100, "n": -280, "b": -320, "r": -479, "q": -929, "k": -60000}
 piece_vals = {"P": 100, "N": 280, "B": 320, "R": 479, "Q": 929, "K": 60000}
+
+
+b_pawn_pst = np.array([[0,   0,   0,   0,   0,   0,   0,   0],
+                    [78,  83,  86,  73, 102,  82,  85,  90],  
+                    [7,  29,  21,  44,  40,  31,  44,   7],  
+                    [-17,  16,  -2,  15,  14,   0,  15, -13], 
+                    [-26,   3,  10,   9,   6,   1,   0, -23],  
+                    [-22,   9,   5, -11, -10,  -2,   3, -19], 
+                    [-31,   8,  -7, -37, -36, -14,   3, -31],  
+                    [0,   0,   0,   0,   0,   0,   0,   0]])
+w_pawn_pst = np.flipud(b_pawn_pst) # Should be the version from whites POV
+
 pst = {
     # The bot is playing as black
     'P': (   0,   0,   0,   0,   0,   0,   0,   0,  #       ^ player | idx = 0
@@ -158,18 +171,20 @@ def evaluate_board(board=chess.Board(), move=chess.Move(chess.Move.null(), chess
     """
     # Update the piece activity
     side = 2*board.turn - 1 # either 1 or -1
+    score = side * score
+    pst = {"P" : (b_pawn_pst, w_pawn_pst)}
+
+
     # logging.info(f"Score: {score}")
     capture_dif = 0
     atk_piece = board.piece_at(move.from_square).symbol().upper() # get the piece, like "B"
-    pst_dif = pst[atk_piece][-side * move.to_square] - pst[atk_piece][-side * move.from_square]
+    pst_dif = pst[atk_piece][board.turn][move.to_square // 8][move.to_square % 8] - pst[atk_piece][board.turn][move.from_square // 8][move.from_square % 8]
 
     # Update for captures
     if board.is_capture(move):
         logging.info("capture")
-        breakpoint()
         # Only get a captured piece if there was a capture
-        cptd_piece = board.piece_at(move.to_square).symbol()
+        cptd_piece = board.piece_at(move.to_square).symbol().upper()
         # Sum piece value of captured piece with its activity, reverse the board with 63-move.to_square
-        capture_dif = piece_vals[board.piece_at(move.to_square).piece_type.symbol()] + pst[cptd_piece][63 - move.to_square]
-        
+        capture_dif = piece_vals[cptd_piece] + pst[cptd_piece][board.turn][move.to_square // 8][move.to_square % 8]
     return side * (score + pst_dif + capture_dif)
