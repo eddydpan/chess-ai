@@ -225,18 +225,26 @@ def evaluate_board(board=chess.Board(), move=chess.Move(chess.Move.null(), chess
     # Update the piece activity
     side = 2*board.turn - 1 # either 1 or -1
     score = side * score
+    # Check if outcome has been met |||||ADD BACK THE move.push|||||||
+    if board.is_checkmate():
+        return side * float("inf")
+    if board.is_stalemate() or board.is_insufficient_material() or board.is_repetition(3):
+        return 0
 
-
+    # move = board.pop()
     # logging.info(f"Score: {score}")
     capture_dif = 0
+    # breakpoint()
     atk_piece = board.piece_at(move.from_square).symbol().upper() # get the piece, like "B"
     pst_dif = pst[atk_piece][board.turn][move.to_square // 8][move.to_square % 8] - pst[atk_piece][board.turn][move.from_square // 8][move.from_square % 8]
 
     # Update for captures
     if board.is_capture(move):
         logging.info("capture")
+        # breakpoint()
         # Only get a captured piece if there was a capture
         cptd_piece = board.piece_at(move.to_square).symbol().upper()
         # Sum piece value of captured piece with its activity, reverse the board with 63-move.to_square
         capture_dif = piece_vals[cptd_piece] + pst[cptd_piece][board.turn][move.to_square // 8][move.to_square % 8]
+    
     return side * (score + pst_dif + capture_dif)
