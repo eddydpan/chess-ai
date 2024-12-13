@@ -16,7 +16,6 @@ class Minimax:
         pass
 
     def alpha_beta_max(self, depth, alpha, beta, move, score=0):
-        print(f"max {depth}")
         try:
             cur_score = evaluate_board(self.board, move, score)
         except:
@@ -32,8 +31,7 @@ class Minimax:
         list_of_legal_moves = list(self.board.legal_moves)
         for i in list_of_legal_moves:
             cur_eval = self.alpha_beta_min(depth - 1, alpha, beta, i, cur_score)[0]
-            print(cur_eval)
-            print(i)
+           
             if cur_eval > max_eval:
                 max_eval = cur_eval
                 best_move = i
@@ -45,14 +43,9 @@ class Minimax:
         if not move == chess.Move.null():
             self.board.pop()
 
-        print(move)
-        print(max_eval)
-        print()
-        print()
         return (max_eval, best_move)
 
     def alpha_beta_min(self, depth, alpha, beta, move, score=0):
-        print(f"min {depth}")
         try:
             cur_score = evaluate_board(self.board, move, score)
         except:
