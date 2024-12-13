@@ -15,70 +15,68 @@ class Minimax:
         self.board = board
         pass
 
-    def alpha_beta_max(self, depth, alpha, beta, move):
+    def alpha_beta_max(self, depth, alpha, beta, move, score=0):
         print(f"max {depth}")
-        print(move)
+        try:
+            cur_score = evaluate_board(self.board, move, score)
+        except:
+            cur_score = 0
         if depth == 0:
-            return (evaluate_board(self.board, move), move)
+            return (cur_score, move)
         max_eval = float("-inf")
         best_move = None
 
-        if move is not None:
+        if not move == chess.Move.null():
             self.board.push(move)
-
-        print(self.board)
 
         list_of_legal_moves = list(self.board.legal_moves)
         for i in list_of_legal_moves:
-            cur_eval = self.alpha_beta_min(depth - 1, alpha, beta, i)[0]
+            cur_eval = self.alpha_beta_min(depth - 1, alpha, beta, i, cur_score)[0]
+            print(cur_eval)
+            print(i)
             if cur_eval > max_eval:
-                max_eval = alpha
+                max_eval = cur_eval
                 best_move = i
-                if cur_eval > alpha:
-                    alpha = cur_eval
             if cur_eval >= beta:
-                print("PRUNES")
-                self.board.pop()
-                print(f"SCORE {cur_eval}")
-                return (cur_eval, best_move)
+                break
+            if max_eval > alpha:
+                alpha = max_eval
 
-        if move is not None:
-            print("POP")
+        if not move == chess.Move.null():
             self.board.pop()
 
-        print(f"SCORE {max_eval}")
+        print(move)
+        print(max_eval)
+        print()
+        print()
         return (max_eval, best_move)
 
-    def alpha_beta_min(self, depth, alpha, beta, move):
+    def alpha_beta_min(self, depth, alpha, beta, move, score=0):
         print(f"min {depth}")
-        print(move)
+        try:
+            cur_score = evaluate_board(self.board, move, score)
+        except:
+            cur_score = 0
         if depth == 0:
-            return (evaluate_board(self.board, move), move)
+            return (cur_score, move)
         min_eval = float("inf")
         best_move = None
 
-        if move is not None:
+        if not move == chess.Move.null():
             self.board.push(move)
-
-        print(self.board)
 
         list_of_legal_moves = list(self.board.legal_moves)
         for i in list_of_legal_moves:
-            cur_eval = self.alpha_beta_max(depth - 1, alpha, beta, i)[0]
+            cur_eval = self.alpha_beta_max(depth - 1, alpha, beta, i, cur_score)[0]
             if cur_eval < min_eval:
                 min_eval = cur_eval
                 best_move = i
-                if cur_eval < beta:
-                    beta = cur_eval
             if cur_eval <= alpha:
-                print("PRUNES")
-                self.board.pop()
-                print(f"SCORE {cur_eval}")
-                return (cur_eval, best_move)
+                break
+            if min_eval < beta:
+                beta = min_eval
 
-        if move is not None:
-            print("POP1")
+        if not move == chess.Move.null():
             self.board.pop()
 
-        print(f"SCORE {min_eval}")
         return (min_eval, best_move)
