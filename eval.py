@@ -227,16 +227,19 @@ def evaluate_board(board=chess.Board(), move=chess.Move(chess.Move.null(), chess
     score = side * score
 
 
-    # logging.info(f"Score: {score}")
     capture_dif = 0
     atk_piece = board.piece_at(move.from_square).symbol().upper() # get the piece, like "B"
     pst_dif = pst[atk_piece][board.turn][move.to_square // 8][move.to_square % 8] - pst[atk_piece][board.turn][move.from_square // 8][move.from_square % 8]
 
     # Update for captures
     if board.is_capture(move):
-        logging.info("capture")
+        capture_square = move.to_square
+        # En passant
+        if board.is_en_passant(move):
+            capture_square += 8 # the pawn that got en-passant'd would be behind the attacking pawn
+        
         # Only get a captured piece if there was a capture
-        cptd_piece = board.piece_at(move.to_square).symbol().upper()
+        cptd_piece = board.piece_at(capture_square).symbol().upper()
         # Sum piece value of captured piece with its activity, reverse the board with 63-move.to_square
-        capture_dif = piece_vals[cptd_piece] + pst[cptd_piece][board.turn][move.to_square // 8][move.to_square % 8]
+        capture_dif = piece_vals[cptd_piece] + pst[cptd_piece][board.turn][capture_square // 8][capture_square % 8]
     return side * (score + pst_dif + capture_dif)

@@ -61,7 +61,7 @@ class DrawGame:
         self.draw_pieces()
 
         self.draw_captured_pieces()
-        self.draw_evaluation_bar()
+        # self.draw_evaluation_bar()
 
         # highlight selected square and potential moves
         if self.selected_square is not None:
