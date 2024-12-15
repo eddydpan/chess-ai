@@ -586,19 +586,23 @@ def evaluate_board(
     Args:
         board: a chess.Board() object to be evaluated. Defaults to starting
             game position.
+        move: a chess.Move object representing the move to evaluate.
+        score: an optional base score to factor into evaluation.
     Returns:
         An int where a positive number means white is favored and a negative
         number means black is favored. The greater the magnitude of the int,
         the more favored the position is.
     """
     # Update the piece activity
-    side = 2 * board.turn - 1  # either 1 or -1
+    side = 2 * board.turn - 1  # either 1 (white) or -1 (black)
     score = side * score
 
     capture_dif = 0
     atk_piece = (
         board.piece_at(move.from_square).symbol().upper()
-    )  # get the piece, like "B"
+    )  # get the piece symbol
+
+    # Calculate piece-square table difference (pst_dif)
     pst_dif = (
         pst[atk_piece][board.turn][move.to_square // 8][move.to_square % 8]
         - pst[atk_piece][board.turn][move.from_square // 8][move.from_square % 8]
@@ -607,7 +611,8 @@ def evaluate_board(
     # Update for captures
     if board.is_capture(move):
         capture_square = move.to_square
-        # En passant
+
+        # Handle en passant
         if board.is_en_passant(move):
             capture_square += (
                 8  # the pawn that got en-passant'd would be behind the attacking pawn
@@ -615,9 +620,27 @@ def evaluate_board(
 
         # Only get a captured piece if there was a capture
         cptd_piece = board.piece_at(capture_square).symbol().upper()
-        # Sum piece value of captured piece with its activity, reverse the board with 63-move.to_square
+        # Sum piece value of captured piece with its activity, reverse the board with 63 - square
         capture_dif = (
             piece_vals[cptd_piece]
             + pst[cptd_piece][board.turn][capture_square // 8][capture_square % 8]
         )
+
+    # Quick check: Skip evaluation if the move doesn't deliver check or checkmate is impossible
+    if not board.gives_check(move) or board.is_insufficient_material():
+        return side * (score + pst_dif + capture_dif)
+
+    # Optimize checkmate and stalemate evaluation by limiting push/pop usage
+    legal_moves = list(board.legal_moves)
+    if len(legal_moves) <= 5:  # Forced moves are rare; check for game-ending conditions
+        board.push(move)
+        if board.is_checkmate():
+            board.pop()
+            return 100000 * side
+        if board.is_stalemate():
+            board.pop()
+            return 0
+        board.pop()
+
+    # Return the final evaluated score without additional overhead
     return side * (score + pst_dif + capture_dif)
