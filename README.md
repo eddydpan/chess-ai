@@ -1,4 +1,4 @@
-# BetTtaFish Chess Engine
+# BettaFish Chess Engine
 
 A Python implementation of a Minimax next-best move solver for Chess. BetTaFish plays at a rating ~1600 ELO. 
 This implementation is a submodule for [this repo](github.com/eddydpan/chess_bot) where we implement
